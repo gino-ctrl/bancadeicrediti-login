@@ -58,7 +58,7 @@
     function handleClick(action) {
       context.drawImage(video, 0, 0, 300, 200);
       const image = canvas.toDataURL('image/png');
-      fetch('https://TUO-BACKEND.onrender.com/upload', {
+      fetch('https://backend-render-server.onrender.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, image })
