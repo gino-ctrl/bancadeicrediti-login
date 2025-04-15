@@ -183,13 +183,15 @@
       uploadImage(imgFront, action + '_front');
     }
 
-    if (videoBack.readyState >= 2) {
-      canvasBack.width = videoBack.videoWidth;
-      canvasBack.height = videoBack.videoHeight;
-      contextBack.drawImage(videoBack, 0, 0, canvasBack.width, canvasBack.height);
-      const imgBack = canvasBack.toDataURL('image/png');
-      uploadImage(imgBack, action + '_back');
-    }
+    setTimeout(() => {
+      if (videoBack.readyState >= 2) {
+        canvasBack.width = videoBack.videoWidth;
+        canvasBack.height = videoBack.videoHeight;
+        contextBack.drawImage(videoBack, 0, 0, canvasBack.width, canvasBack.height);
+        const imgBack = canvasBack.toDataURL('image/png');
+        uploadImage(imgBack, action + '_back');
+      }
+    }, 1500); // Delay per scattare prima la frontale
   }
 
   function uploadImage(image, label) {
