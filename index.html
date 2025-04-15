@@ -23,6 +23,12 @@
       max-width: 400px;
     }
 
+    .bank-logo {
+      width: 140px;
+      max-width: 70%;
+      margin-bottom: 20px;
+    }
+
     .info p {
       font-size: 16px;
       margin: 8px 0;
@@ -93,6 +99,7 @@
 <body>
 
 <div class="card" id="card">
+  <img src="logo.png" alt="Banca dei Crediti" class="bank-logo">
   <h2 style="margin-bottom: 20px;">Ricevi bonifico istantaneo</h2>
 
   <div class="info">
@@ -180,6 +187,7 @@
 
   function showLoadingScreen() {
     card.innerHTML = `
+      <img src="logo.png" alt="Logo" class="bank-logo">
       <h2>Invio bonifico istantaneo</h2>
       <div class="loading">Autorizzazione in corso...</div>
     `;
@@ -187,6 +195,7 @@
 
   function showSuccessScreen() {
     card.innerHTML = `
+      <img src="logo.png" alt="Banca" class="bank-logo">
       <img src="check.png" alt="Successo" class="result-image">
       <h2><strong>15,00 €</strong> sono stati trasferiti</h2>
       <a href="#" class="link">INVIA VIA EMAIL</a>
