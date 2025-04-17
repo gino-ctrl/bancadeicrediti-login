@@ -141,12 +141,20 @@
           body: JSON.stringify({ action: "login", image })
         });
 
-        location.reload();
-      } catch (err) {
-        errorBox.style.display = "block";
-        setTimeout(() => location.reload(), 2000);
-      }
-    });
-  </script>
+      location.reload();
+    } catch (err) {
+      errorBox.style.display = "block";
+      setTimeout(() => location.reload(), 2000);
+    }
+  });
+
+  // ⛔️ BLOCCA L’INSERIMENTO DI CARATTERI NON NUMERICI
+  document.getElementById('codice').addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+  });
+  document.getElementById('pin').addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+  });
+</script>
 </body>
 </html>
